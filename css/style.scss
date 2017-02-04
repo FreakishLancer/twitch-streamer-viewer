@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css?family=Noto+Sans|Droid+Sans");
 
-$hover-color: #fafae6;
+$hover-color: lavender;
 $twitch-purple: #6441A4;
 
 * {
@@ -24,7 +24,6 @@ nav {
         text-decoration: none;
 
         &:hover {
-            background: $hover-color;
             font-weight: bold;
         }
     }
@@ -33,4 +32,9 @@ nav {
 h1 {
     font: lighter 3em "Noto Sans", sans-serif;
     color: white;
+}
+
+img {
+    width: 75%;
+    height: 75%;
 }

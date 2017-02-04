@@ -14,9 +14,12 @@ nav {
     color: black;
     text-decoration: none; }
     nav a:hover {
-      background: #fafae6;
       font-weight: bold; }
 
 h1 {
   font: lighter 3em "Noto Sans", sans-serif;
   color: white; }
+
+img {
+  width: 75%;
+  height: 75%; }
