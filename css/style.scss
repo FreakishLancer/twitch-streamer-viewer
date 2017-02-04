@@ -16,7 +16,6 @@ nav {
 
     ul {
         background: white;
-        list-style: none;
     }
 
     a {
@@ -37,4 +36,12 @@ h1 {
 img {
     width: 75%;
     height: 75%;
+}
+
+table {
+    text-align: justify;
+
+    .table-text {
+        font-size: 0.75em;
+    }
 }

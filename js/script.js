@@ -1,4 +1,5 @@
-const streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
+const streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas", "kaceytron", "syndicate",
+    "riotgames", "imaqtpie", "lirik", "nightblue3", "trick2g", "doublelift", "c9sneaky"];
 const twitchAPI = "https://wind-bow.gomix.me/twitch-api/";
 
 
@@ -13,14 +14,14 @@ class Channel {
             if (data.hasOwnProperty("message")) this.message = data.message;
 
             this.name = data.display_name;
-            this.bio = data.bio;
+            data.bio === null ? this.bio = "" : this.bio = data.bio;
             this.logo = data.logo;
         });
 
         $.getJSON(streamsAPI, data => {
-            if (data.stream === null) this.isOnline = false;
+            if (data.stream === null) this.onlineStatus = `<i class="fa fa-times" aria-hidden="true"></i>`;
             else if (data.stream !== null && data.stream !== undefined) {
-                this.isOnline = true;
+                this.onlineStatus = `<i class="fa fa-check" aria-hidden="true"></i>`;
                 this.gameStreamed = data.stream.game;
                 this.currentViewers = data.stream.viewers;
                 this.streamPreviewImage = data.stream.preview.medium;
@@ -28,22 +29,38 @@ class Channel {
         });
 
         $.getJSON(channelsAPI, data => {
-            this.status = data.status;
+            data.status === null ? this.status = "" : this.status = data.status;
             this.banner = data.profile_banner;
             this.url = data.url;
             this.totalViews = data.views;
             this.followers = data.followers;
         });
 
-        this.tableString = `<th scope="row">#</th>
-                                <td>${this.isOnline}</td>
-                                <td><a href="${this.url}">${this.name}</a></td>
-                                <td><img src="${this.logo}" alt="${this.name} channel logo"></td>
-                                <td>${this.bio}</td>
-                                <td>${this.status}</td>
-                                <td>${this.totalViews}</td>
-                                <td>${this.followers}</td>
-                            </tr>`;
+        this.hasOwnProperty("message") ? 
+            this.tableString = `<th scope="row" colspan="2"></th>
+                                    <td colspan="5">${this.message}</td>
+                                </tr>` :
+            this.tableString = `<th scope="row">${this.onlineStatus}</th>
+                                    <td><img src="${this.logo}" alt="${this.name} channel logo"></td>
+                                    <td><a href="${this.url}" target="_blank">${this.name}</a></td>
+                                    <td class="table-text">${this.bio}</td>
+                                    <td class="table-text">${this.status}</td>
+                                    <td>${this.totalViews}</td>
+                                    <td>${this.followers}</td>
+                                </tr>`;
+    }
+
+    static findStreamer() {
+        let searchTerm = $("#search-term").val();
+        Channel.appendStreamer(searchTerm);
+    }
+
+    static appendStreamer(searchTerm) {
+        let streamer = new Channel(searchTerm);
+
+        streamer.onlineStatus === `<i class="fa fa-check" aria-hidden="true"></i>` ? 
+            $(".streamer-info").append(`<tr class="table-success">${streamer.tableString}`) : 
+            $(".streamer-info").append(`<tr class="table-warning">${streamer.tableString}`);
     }
 }
 
@@ -52,13 +69,12 @@ $(document).ready(() => {
     $.ajaxSetup({async: false});
 
     streamers.map(x => {
-        let streamer = new Channel(x);
+        Channel.appendStreamer(x);
+    });
 
-        if (streamer.name === undefined) return;
-
-        streamer.isOnline ? 
-            $(".streamer-info").append(`<tr class="table-success">${streamer.tableString}`) : 
-            $(".streamer-info").append(`<tr class="table-warning">${streamer.tableString}`);
+    $("#submit-search").on("click", () => {
+        $(".streamer-info").html("");
+        Channel.findStreamer();
     });
 
 });
