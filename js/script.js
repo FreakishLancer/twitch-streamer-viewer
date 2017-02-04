@@ -1,5 +1,4 @@
-const streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas", "kaceytron", "syndicate",
-    "riotgames", "imaqtpie", "lirik", "nightblue3", "trick2g", "doublelift", "c9sneaky"];
+const streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
 const twitchAPI = "https://wind-bow.gomix.me/twitch-api/";
 
 
@@ -12,7 +11,6 @@ class Channel {
 
         $.getJSON(usersAPI, data => {
             if (data.hasOwnProperty("message")) this.message = data.message;
-
             this.name = data.display_name;
             data.bio === null ? this.bio = "" : this.bio = data.bio;
             this.logo = data.logo;
@@ -20,17 +18,11 @@ class Channel {
 
         $.getJSON(streamsAPI, data => {
             if (data.stream === null) this.onlineStatus = `<i class="fa fa-times" aria-hidden="true"></i>`;
-            else if (data.stream !== null && data.stream !== undefined) {
-                this.onlineStatus = `<i class="fa fa-check" aria-hidden="true"></i>`;
-                this.gameStreamed = data.stream.game;
-                this.currentViewers = data.stream.viewers;
-                this.streamPreviewImage = data.stream.preview.medium;
-            }
+            else if (data.stream !== null && data.stream !== undefined) this.onlineStatus = `<i class="fa fa-check" aria-hidden="true"></i>`;
         });
 
         $.getJSON(channelsAPI, data => {
             data.status === null ? this.status = "" : this.status = data.status;
-            this.banner = data.profile_banner;
             this.url = data.url;
             this.totalViews = data.views;
             this.followers = data.followers;
@@ -48,18 +40,12 @@ class Channel {
                                     <td>${this.totalViews}</td>
                                     <td>${this.followers}</td>
                                 </tr>`;
+
     }
 
-    static findStreamer() {
-        let searchTerm = $("#search-term").val();
-        Channel.appendStreamer(searchTerm);
-    }
-
-    static appendStreamer(searchTerm) {
-        let streamer = new Channel(searchTerm);
-
-        streamer.onlineStatus === `<i class="fa fa-check" aria-hidden="true"></i>` ? 
-            $(".streamer-info").append(`<tr class="table-success">${streamer.tableString}`) : 
+    static appendStreamer(streamer) {
+        streamer.onlineStatus === `<i class="fa fa-check" aria-hidden="true"></i>` ?
+            $(".streamer-info").append(`<tr class="table-success">${streamer.tableString}`) :
             $(".streamer-info").append(`<tr class="table-warning">${streamer.tableString}`);
     }
 }
@@ -69,12 +55,42 @@ $(document).ready(() => {
     $.ajaxSetup({async: false});
 
     streamers.map(x => {
-        Channel.appendStreamer(x);
+        let streamer = new Channel(x);
+        Channel.appendStreamer(streamer);
     });
 
     $("#submit-search").on("click", () => {
+        let searchTerm = $("#search-term").val();
+        if (searchTerm === undefined || searchTerm === null || searchTerm === "") return;
+        else {
+            let streamer = new Channel(searchTerm);
+            $(".streamer-info").html("");
+            Channel.appendStreamer(streamer);
+        }
+    });
+
+    $("#all-streamers").on("click", () => {
         $(".streamer-info").html("");
-        Channel.findStreamer();
+        streamers.map(x => {
+            let streamer = new Channel(x);
+            Channel.appendStreamer(streamer);
+        });
+    });
+
+    $("#online-streamers").on("click", () => {
+        $(".streamer-info").html("");
+        streamers.map(x => {
+            let streamer = new Channel(x);
+            if (streamer.onlineStatus === `<i class="fa fa-check" aria-hidden="true"></i>`) Channel.appendStreamer(streamer);
+        });
+    });
+
+    $("#offline-streamers").on("click", () => {
+        $(".streamer-info").html("");
+        streamers.map(x => {
+            let streamer = new Channel(x);
+            if (streamer.onlineStatus !== `<i class="fa fa-check" aria-hidden="true"></i>`) Channel.appendStreamer(streamer);
+        });
     });
 
 });

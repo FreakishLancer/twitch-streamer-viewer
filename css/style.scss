@@ -14,16 +14,31 @@ nav {
     width: 100%;
     background-color: $twitch-purple;
 
-    ul {
-        background: white;
+    a {
+        text-decoration: none;
+        color: inherit;
+
+        &:hover {
+            color: inherit;
+        }
     }
 
-    a {
+    ul {
+        background: white;
+        border-radius: .3em;
+    }
+
+    button {
         color: black;
-        text-decoration: none;
+        background: white;
 
         &:hover {
             font-weight: bold;
+            cursor: pointer;
+        }
+
+        &:active {
+            font-size: 1.1em;
         }
     }
 }
@@ -44,4 +59,17 @@ table {
     .table-text {
         font-size: 0.75em;
     }
+}
+
+button#submit-search {
+    background: white;
+    color: black;
+
+    &:hover {
+        background-color: $hover-color;
+    }
+}
+
+ul {
+    margin-right: 6px;
 }
