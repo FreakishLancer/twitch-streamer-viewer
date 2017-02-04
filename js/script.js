@@ -43,13 +43,12 @@ class Channel {
 
     }
 
-    static findStreamer(searchTerm) {
+    static findStreamer() {
+        let searchTerm = $("#search-term").val();
         if (searchTerm === undefined || searchTerm === null || searchTerm === "") return;
-        else {
-            $(".streamer-info").html("");
-            let streamer = new Channel(searchTerm);
-            Channel.appendStreamer(streamer);
-        }
+        let streamer = new Channel(searchTerm);
+        $(".streamer-info").html("");
+        Channel.appendStreamer(streamer);
     }
 
     static appendStreamer(streamer) {
@@ -68,9 +67,8 @@ $(document).ready(() => {
         Channel.appendStreamer(streamer);
     });
 
-    $("#submit-search").on("click", () => {
-        let searchTerm = $("#search-term").val();
-        Channel.findStreamer(searchTerm);
+/*    $("#submit-search").on("click", () => {
+        Channel.findStreamer();
     });
 
     $("#submit-search").keypress(key => {
@@ -78,7 +76,7 @@ $(document).ready(() => {
             let searchTerm = $("#search-term").val();
             Channel.findStreamer(searchTerm);
         }
-    })
+    })*/
 
     $("#all-streamers").on("click", () => {
         $(".streamer-info").html("");
