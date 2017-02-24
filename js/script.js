@@ -1,24 +1,44 @@
-const streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
+const streamers = [
+    "ESL_SC2",
+    "OgamingSC2",
+    "cretetion",
+    "freecodecamp",
+    "storbeck",
+    "habathcx",
+    "RobotCaleb",
+    "noobs2ninjas"
+    ];
 const twitchAPI = "https://wind-bow.gomix.me/twitch-api/";
 
-
 class Channel {
-    constructor(name) {
+    constructor(name, statusCheck = "all") {
 
-        let streamsAPI = `${twitchAPI}streams/${name}`;
-        let usersAPI = `${twitchAPI}users/${name}`;
-        let channelsAPI = `${twitchAPI}channels/${name}`;
+        const streamsAPI = `${twitchAPI}streams/${name}`;
+        const usersAPI = `${twitchAPI}users/${name}`;
+        const channelsAPI = `${twitchAPI}channels/${name}`;
+
+        let dataCount = 0;
 
         $.getJSON(usersAPI, data => {
             if (data.hasOwnProperty("message")) this.message = data.message;
             this.name = data.display_name;
             data.bio === null ? this.bio = "" : this.bio = data.bio;
             this.logo = data.logo;
+        }).then(() => {
+            dataCount++;
+            if (dataCount === 3) {
+                Channel.appendStreamer(this, statusCheck);
+            }
         });
 
         $.getJSON(streamsAPI, data => {
-            if (data.stream === null) this.onlineStatus = `<i class="fa fa-times" aria-hidden="true"></i>`;
-            else if (data.stream !== null && data.stream !== undefined) this.onlineStatus = `<i class="fa fa-check" aria-hidden="true"></i>`;
+            if (data.stream === null) this.onlineStatus = `<i class="fa fa-times"></i>`;
+            else if (data.stream !== null && data.stream !== undefined) this.onlineStatus = `<i class="fa fa-check"></i>`;
+        }).then(() => {
+            dataCount++;
+            if (dataCount === 3) {
+                Channel.appendStreamer(this, statusCheck);
+            }
         });
 
         $.getJSON(channelsAPI, data => {
@@ -26,80 +46,59 @@ class Channel {
             this.url = data.url;
             this.totalViews = data.views;
             this.followers = data.followers;
+        }).then(() => {
+            dataCount++;
+            if (dataCount === 3) {
+                Channel.appendStreamer(this, statusCheck);
+            }
         });
-
-        this.hasOwnProperty("message") ? 
-            this.tableString = `<th scope="row" colspan="2"></th>
-                                    <td colspan="5">${this.message}</td>
-                                </tr>` :
-            this.tableString = `<th scope="row">${this.onlineStatus}</th>
-                                    <td><img src="${this.logo}" alt="${this.name} channel logo"></td>
-                                    <td><a href="${this.url}" target="_blank">${this.name}</a></td>
-                                    <td class="table-text">${this.bio}</td>
-                                    <td class="table-text">${this.status}</td>
-                                    <td>${this.totalViews}</td>
-                                    <td>${this.followers}</td>
-                                </tr>`;
-
     }
 
-    static findStreamer() {
-        let searchTerm = $("#search-term").val();
-        if (searchTerm === undefined || searchTerm === null || searchTerm === "") return;
-        let streamer = new Channel(searchTerm);
-        $(".streamer-info").html("");
-        Channel.appendStreamer(streamer);
-    }
+    static appendStreamer(streamer, statusCheck) {
+        streamer.hasOwnProperty("message") ?
+            streamer.tableString = `<th scope="row" colspan="2"></th>
+                <td colspan="5">${streamer.message}</td>
+            </tr>` :
+            streamer.tableString = `<th scope="row">${streamer.onlineStatus}</th>
+                <td><img src="${streamer.logo}" alt="${streamer.name} channel logo"></td>
+                <td><a href="${streamer.url}" target="_blank">${streamer.name}</a></td>
+                <td class="table-text">${streamer.bio}</td>
+                <td class="table-text">${streamer.status}</td>
+                <td>${streamer.totalViews}</td>
+                <td>${streamer.followers}</td>
+            </tr>`;
 
-    static appendStreamer(streamer) {
-        streamer.onlineStatus === `<i class="fa fa-check" aria-hidden="true"></i>` ?
-            $(".streamer-info").append(`<tr class="table-success">${streamer.tableString}`) :
-            $(".streamer-info").append(`<tr class="table-warning">${streamer.tableString}`);
+        if (statusCheck === "all") {
+            streamer.onlineStatus === `<i class="fa fa-check"></i>` ?
+                $(".streamer-info").append(`<tr class="table-success">${streamer.tableString}`) :
+                $(".streamer-info").append(`<tr class="table-warning">${streamer.tableString}`);
+        } else if (statusCheck === "online") {
+            if (streamer.onlineStatus === `<i class="fa fa-check"></i>`)
+                $(".streamer-info").append(`<tr class="table-success">${streamer.tableString}`);
+        } else if (statusCheck === "offline") {
+            if (streamer.onlineStatus !== `<i class="fa fa-check"></i>`)
+                $(".streamer-info").append(`<tr class="table-warning">${streamer.tableString}`);
+        }
     }
 }
 
 $(document).ready(() => {
 
-    $.ajaxSetup({async: false});
-
-    streamers.map(x => {
-        let streamer = new Channel(x);
-        Channel.appendStreamer(streamer);
-    });
-
-/*    $("#submit-search").on("click", () => {
-        Channel.findStreamer();
-    });
-
-    $("#submit-search").keypress(key => {
-        if (key.keyCode === 13) {
-            let searchTerm = $("#search-term").val();
-            Channel.findStreamer(searchTerm);
-        }
-    })*/
+    streamers.map(x => new Channel(x));
 
     $("#all-streamers").on("click", () => {
         $(".streamer-info").html("");
-        streamers.map(x => {
-            let streamer = new Channel(x);
-            Channel.appendStreamer(streamer);
-        });
+        streamers.map(x => new Channel(x));
     });
 
     $("#online-streamers").on("click", () => {
         $(".streamer-info").html("");
-        streamers.map(x => {
-            let streamer = new Channel(x);
-            if (streamer.onlineStatus === `<i class="fa fa-check" aria-hidden="true"></i>`) Channel.appendStreamer(streamer);
-        });
+        streamers.map(x => new Channel(x, "online"));
     });
 
     $("#offline-streamers").on("click", () => {
         $(".streamer-info").html("");
-        streamers.map(x => {
-            let streamer = new Channel(x);
-            if (streamer.onlineStatus !== `<i class="fa fa-check" aria-hidden="true"></i>`) Channel.appendStreamer(streamer);
-        });
+        streamers.map(x => new Channel(x, "offline"));
     });
 
 });
